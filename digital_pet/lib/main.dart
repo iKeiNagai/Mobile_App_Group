@@ -12,15 +12,19 @@ class DigitalPetApp extends StatefulWidget {
 }
 
 class _DigitalPetAppState extends State<DigitalPetApp> {
-  String petName = "Your Pet";
+  String petName = "Peter";
   int happinessLevel = 50;
   int hungerLevel = 50;
+
+  String currentMood = "";
+  List<String> mood = ["Happy", "Neutral", "Unhappy"];
 
   // Function to increase happiness and update hunger when playing with the pet
   void _playWithPet() {
     setState(() {
       happinessLevel = (happinessLevel + 10).clamp(0, 100);
       _updateHunger();
+      _updateMood(happinessLevel);
     });
   }
 
@@ -29,9 +33,19 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     setState(() {
       hungerLevel = (hungerLevel - 10).clamp(0, 100);
       _updateHappiness();
+      _updateMood(happinessLevel);
     });
   }
 
+  void _updateMood(int happinessLevel){
+    if(happinessLevel > 70){
+      currentMood = mood[0];
+    } else if(happinessLevel < 70 && happinessLevel > 30){
+      currentMood =mood[1];
+    } else if(happinessLevel < 30){
+      currentMood= mood[2];
+    }
+  }
   // Update happiness based on hunger level
   void _updateHappiness() {
     if (hungerLevel < 30) {
@@ -64,6 +78,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               'Name: $petName',
               style: TextStyle(fontSize: 20.0),
             ),
+            Text('Current Mood: $currentMood'),
             SizedBox(height: 16.0),
             Text(
               'Happiness Level: $happinessLevel',
