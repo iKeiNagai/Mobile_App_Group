@@ -1,3 +1,5 @@
+import 'dart:async'; // Import dart:async for Timer
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,6 +21,29 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String currentMood = "";
   TextEditingController nameController = TextEditingController();
   List<String> mood = ["Happy", "Neutral", "Unhappy"];
+  Timer? hungerTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start the timer to increase hunger every 30 seconds
+    hungerTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+      setState(() {
+        hungerLevel = (hungerLevel + 5).clamp(0, 100);
+        if (hungerLevel >= 100) {
+          hungerLevel = 100;
+          happinessLevel = (happinessLevel - 20).clamp(0, 100);
+        }
+        _updateMood(happinessLevel);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    hungerTimer?.cancel(); // Cancel the timer when widget is disposed
+    super.dispose();
+  }
 
   // Function to increase happiness and update hunger when playing with the pet
   void _playWithPet() {
@@ -28,11 +53,13 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       _updateMood(happinessLevel);
     });
   }
-void _changePetName() {
+
+  void _changePetName() {
     setState(() {
       petName = nameController.text.isNotEmpty ? nameController.text : petName;
     });
   }
+
   // Function to decrease hunger and update happiness when feeding the pet
   void _feedPet() {
     setState(() {
@@ -42,18 +69,19 @@ void _changePetName() {
     });
   }
 
-  void _updateMood(int happinessLevel){
-    if(happinessLevel > 70){
+  void _updateMood(int happinessLevel) {
+    if (happinessLevel > 70) {
       currentMood = mood[0];
-      textColor = textColor = Colors.green;
-    } else if(happinessLevel < 70 && happinessLevel > 30){
-      currentMood =mood[1];
-      textColor = textColor = Colors.yellow;
-    } else if(happinessLevel < 30){
-      currentMood= mood[2];
-      textColor = textColor = Colors.red;
+      textColor = Colors.green;
+    } else if (happinessLevel < 70 && happinessLevel > 30) {
+      currentMood = mood[1];
+      textColor = Colors.yellow;
+    } else if (happinessLevel <= 30) {
+      currentMood = mood[2];
+      textColor = Colors.red;
     }
   }
+
   // Update happiness based on hunger level
   void _updateHappiness() {
     if (hungerLevel < 30) {
@@ -66,7 +94,7 @@ void _changePetName() {
   // Increase hunger level slightly when playing with the pet
   void _updateHunger() {
     hungerLevel = (hungerLevel + 5).clamp(0, 100);
-    if (hungerLevel > 100) {
+    if (hungerLevel >= 100) {
       hungerLevel = 100;
       happinessLevel = (happinessLevel - 20).clamp(0, 100);
     }
@@ -84,16 +112,16 @@ void _changePetName() {
           children: <Widget>[
             Text(
               'Name: $petName',
-              style: TextStyle(fontSize: 20.0 , color: textColor, )
+              style: TextStyle(fontSize: 20.0, color: textColor),
             ),
             TextField(
-            controller: nameController,
-            decoration: InputDecoration(labelText: 'Enter new pet name'),
-          ),
-           TextButton(
-            onPressed: _changePetName,
-            child: Text('Change Name'),
-          ),
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Enter new pet name'),
+            ),
+            TextButton(
+              onPressed: _changePetName,
+              child: Text('Change Name'),
+            ),
             Text('Current Mood: $currentMood'),
             SizedBox(height: 16.0),
             Text(
