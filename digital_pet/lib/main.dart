@@ -27,7 +27,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void initState() {
     super.initState();
     // Start the timer to increase hunger every 30 seconds
-    hungerTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+    hungerTimer = Timer.periodic(Duration(seconds: 30), (timer) {
       setState(() {
         hungerLevel = (hungerLevel + 5).clamp(0, 100);
         if (hungerLevel >= 100) {
