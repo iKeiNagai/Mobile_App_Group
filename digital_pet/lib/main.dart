@@ -15,13 +15,17 @@ class DigitalPetApp extends StatefulWidget {
 
 class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Peter";
+  Timer? _winTimer;         
+  Timer? _lossCheckTimer;   // Timer to check loss condition
+  Timer? hungerTimer;
   int happinessLevel = 50;
   int hungerLevel = 50;
   Color textColor = Colors.black;
   String currentMood = "";
   TextEditingController nameController = TextEditingController();
   List<String> mood = ["Happy", "Neutral", "Unhappy"];
-  Timer? hungerTimer;
+  bool hasWon = false;       // Track win condition
+  bool isGameOver = false;   // Track loss condition
 
   @override
   void initState() {
@@ -37,11 +41,16 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
         _updateMood(happinessLevel);
       });
     });
+
+    // Start loss condition check timer
+    _lossCheckTimer = Timer.periodic(Duration(seconds: 1), _checkLossCondition);
   }
 
   @override
   void dispose() {
-    hungerTimer?.cancel(); // Cancel the timer when widget is disposed
+    hungerTimer?.cancel(); // Cancel the hunger timer when widget is disposed
+    _winTimer?.cancel();   // Cancel the win timer
+    _lossCheckTimer?.cancel(); // Cancel the loss check timer
     super.dispose();
   }
 
@@ -51,6 +60,7 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       happinessLevel = (happinessLevel + 10).clamp(0, 100);
       _updateHunger();
       _updateMood(happinessLevel);
+      _checkWinCondition(happinessLevel); // Check win condition after playing
     });
   }
 
@@ -100,6 +110,33 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
     }
   }
 
+  // Check if the win condition is met
+  void _checkWinCondition(int happinessLevel) {
+    if (happinessLevel > 80 && _winTimer == null) {
+      // Start a timer if happiness level stays above 80
+      _winTimer = Timer(Duration(seconds: 3), () {
+        setState(() {
+          hasWon = true;  // Set win condition to true
+        });
+      });
+    } else if (happinessLevel <= 80 && _winTimer != null) {
+      // Reset the timer if happiness level drops below 80
+      _winTimer!.cancel();
+      _winTimer = null;
+    }
+  }
+
+  // Check for loss condition
+  void _checkLossCondition(Timer timer) {
+    if (hungerLevel >= 100 && happinessLevel <= 10) {
+      setState(() {
+        isGameOver = true;  // Set game over condition
+        _lossCheckTimer?.cancel(); // Stop loss checking
+        _winTimer?.cancel(); // Stop win timer if active
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,6 +180,23 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
               onPressed: _feedPet,
               child: Text('Feed Your Pet'),
             ),
+            // Display win/loss condition messages
+            if (hasWon)
+              Text(
+                'You Win!',
+                style: TextStyle(fontSize: 32, color: Colors.green),
+              )
+            else if (isGameOver)
+              Text(
+                'Game Over!',
+                style: TextStyle(fontSize: 32, color: Colors.red),
+              )
+            else
+              Text(
+                'Keep happiness level above 80 for 3 minutes to win! \nAvoid hunger level reaching 100 with happiness at 10!',
+                style: TextStyle(fontSize: 18, color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
           ],
         ),
       ),
