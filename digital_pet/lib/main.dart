@@ -15,8 +15,9 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   String petName = "Peter";
   int happinessLevel = 50;
   int hungerLevel = 50;
-
+  Color textColor = Colors.black;
   String currentMood = "";
+  TextEditingController nameController = TextEditingController();
   List<String> mood = ["Happy", "Neutral", "Unhappy"];
 
   // Function to increase happiness and update hunger when playing with the pet
@@ -27,7 +28,11 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
       _updateMood(happinessLevel);
     });
   }
-
+void _changePetName() {
+    setState(() {
+      petName = nameController.text.isNotEmpty ? nameController.text : petName;
+    });
+  }
   // Function to decrease hunger and update happiness when feeding the pet
   void _feedPet() {
     setState(() {
@@ -40,10 +45,13 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
   void _updateMood(int happinessLevel){
     if(happinessLevel > 70){
       currentMood = mood[0];
+      textColor = textColor = Colors.green;
     } else if(happinessLevel < 70 && happinessLevel > 30){
       currentMood =mood[1];
+      textColor = textColor = Colors.yellow;
     } else if(happinessLevel < 30){
       currentMood= mood[2];
+      textColor = textColor = Colors.red;
     }
   }
   // Update happiness based on hunger level
@@ -76,8 +84,16 @@ class _DigitalPetAppState extends State<DigitalPetApp> {
           children: <Widget>[
             Text(
               'Name: $petName',
-              style: TextStyle(fontSize: 20.0),
+              style: TextStyle(fontSize: 20.0 , color: textColor, )
             ),
+            TextField(
+            controller: nameController,
+            decoration: InputDecoration(labelText: 'Enter new pet name'),
+          ),
+           TextButton(
+            onPressed: _changePetName,
+            child: Text('Change Name'),
+          ),
             Text('Current Mood: $currentMood'),
             SizedBox(height: 16.0),
             Text(
