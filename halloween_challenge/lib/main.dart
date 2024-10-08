@@ -53,6 +53,8 @@ class _HomePageState extends State<HomePage> {
           Container(
             color: Colors.orange,
           ),
+          Text('Find the correct item. Double tap on it to find out',
+          textAlign: TextAlign.center,),
           Center(
             child: GestureDetector(
               onTap: _playaudio,
